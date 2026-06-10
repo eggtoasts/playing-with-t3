@@ -2,10 +2,11 @@ import cors from "cors";
 import express from "express";
 
 import { initTRPC } from "@trpc/server";
+import { createExpressMiddleware } from "@trpc/server/adapters/express";
 
 const t = initTRPC.create();
 
-t.router({
+const appRouter = t.router({
   // query
   sayHi: t.procedure.query(() => {
     return "Hi";
@@ -24,11 +25,16 @@ t.router({
 });
 
 const app = express();
-// app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors({ origin: "http://localhost:5173" }));
 app.listen(3000, () => {
   console.log("listening @ port 3000 :p");
 });
 
+//adapter, our trpc is set up!!
+app.use("/trpc", createExpressMiddleware({ router: appRouter }));
+
 app.get("/", (req, res) => {
   res.json({ h: "h" });
 });
+
+export type AppRouter = typeof appRouter;
